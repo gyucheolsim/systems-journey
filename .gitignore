@@ -1,0 +1,38 @@
+# 빌드 결과물 — 모든 프로젝트는 산출물을 build/ 아래에 둔다
+build/
+*.o
+*.obj
+*.a
+*.so
+*.so.*
+*.d
+*.gch
+*.wasm
+a.out
+*.out.tmp
+
+# 디버깅·분석 부산물
+core
+core.*
+vgcore.*
+*.dSYM/
+perf.data*
+callgrind.out.*
+massif.out.*
+
+# 실행 중 생기는 데이터 (DB 파일 등은 프로젝트마다 data/ 에 두기)
+data/
+*.db-journal
+*.wal
+
+# Python
+__pycache__/
+*.pyc
+
+# 편집기·OS
+.vscode/
+.idea/
+*.swp
+*~
+.DS_Store
+Thumbs.db

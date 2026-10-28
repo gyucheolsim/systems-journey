@@ -1,0 +1,43 @@
+# 사용법 (저장소 루트에서):
+#   docker compose -f docker/compose.yaml run --rm dev            # 컨테이너 셸로 들어가기
+#   docker compose -f docker/compose.yaml run --rm dev make test  # 명령 하나만 실행
+name: systems-journey
+
+services:
+  dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: systems-journey-dev:latest
+    hostname: sj-dev
+
+    # 셸·줄 편집기 프로젝트는 진짜 터미널이 필요하다 (docker run -it 와 같음)
+    stdin_open: true
+    tty: true
+
+    # 저장소 전체를 /work에 마운트: 편집은 호스트에서, 빌드는 여기서
+    volumes:
+      - ..:/work
+    working_dir: /work
+
+    # gdb·strace는 ptrace를 쓰므로 SYS_PTRACE 권한이 필요하다.
+    # Docker 기본 seccomp 프로필은 personality(2)를 막아 gdb가 ASLR을 끄지 못하고
+    # 경고를 내므로, 학습용 로컬 컨테이너에서는 seccomp를 끈다.
+    cap_add:
+      - SYS_PTRACE
+    security_opt:
+      - seccomp=unconfined
+
+    # init을 PID 1로 둔다. 우리가 만드는 셸이 PID 1이 되면 시그널 기본 동작이
+    # 달라지고(PID 1은 SIGINT 등을 기본으로 무시) 고아 프로세스 회수도 떠맡게 되어
+    # 실제 Linux와 다르게 동작하기 때문이다.
+    init: true
+
+    # 05·06 서버 프로젝트를 호스트 브라우저/클라이언트에서 확인할 때 쓰는 포트.
+    # 'run'은 기본적으로 포트를 열지 않으므로 필요할 때만 --service-ports를 붙인다.
+    ports:
+      - "8080:8080"
+      - "6379:6379"
+
+    environment:
+      - TERM=xterm-256color

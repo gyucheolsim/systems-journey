@@ -1,0 +1,8 @@
+# Windows에서 편집해도 컨테이너(Linux)에서 그대로 쓰도록 모든 텍스트를 LF로 저장한다.
+# 특히 테스트의 기대 출력 파일에 CRLF가 섞이면 비교가 전부 실패한다.
+* text=auto eol=lf
+
+*.ps1 text eol=crlf
+*.png binary
+*.jpg binary
+*.ch8 binary
