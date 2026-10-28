@@ -24,6 +24,11 @@ RUN rm -f /etc/dpkg/dpkg.cfg.d/excludes \
         ca-certificates tzdata \
     && rm -rf /var/lib/apt/lists/*
 
+# 최소 이미지는 진짜 man을 man.REAL로 옮기고 안내 스크립트로 바꿔 둔다. 원래대로 되돌린다.
+RUN rm /usr/bin/man \
+    && dpkg-divert --quiet --local --remove --rename /usr/bin/man \
+    && mandb --quiet
+
 # root가 아닌 사용자로 작업한다. 권한 문제를 root가 가려 버리면
 # 파일 권한·시그널 관련 동작을 잘못 이해하기 쉽기 때문이다.
 # ubuntu:24.04에는 UID 1000인 'ubuntu' 사용자가 이미 있어 이름만 바꿔 쓴다.
