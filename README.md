@@ -4,7 +4,8 @@
 운영체제와 시스템 프로그래밍을 **직접 만들어 보며** 배우는 프로젝트 시리즈입니다.
 
 - 교재: [OSTEP](https://pages.cs.wisc.edu/~remzi/OSTEP/) v1.10, *Computer Systems: A Programmer's Perspective* (CS:APP) 3판
-- 언어: C17 (표준 C + POSIX), 08 홈페이지의 프론트엔드만 예외
+- 언어: 프로젝트마다 C17 또는 C++20 (표준 라이브러리 + POSIX), 08 홈페이지의 프론트엔드는 TypeScript.
+  프로젝트별 권장 언어는 [ROADMAP.md](ROADMAP.md)에 있습니다
 - 프로젝트 순서와 읽기 목록: [ROADMAP.md](ROADMAP.md)
 - 단계별 학습 기록: 각 프로젝트 폴더의 `NOTES.md`
 
@@ -31,7 +32,7 @@
 ## 개발 환경
 
 편집은 호스트에서, 빌드와 실행은 Docker 컨테이너(Ubuntu 24.04)에서 합니다.
-컨테이너에는 gcc, clang, make, gdb, strace, valgrind, python3가 들어 있습니다.
+컨테이너에는 gcc·g++, clang·clang++, make, gdb, strace, valgrind, python3가 들어 있습니다.
 
 ```bash
 # 저장소 루트에서 — 컨테이너 셸로 들어가기 (/work = 저장소)

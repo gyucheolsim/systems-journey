@@ -8,6 +8,15 @@
 | 빌드·실행·테스트·디버깅 | 컨테이너 (`/work` = 저장소) |
 | `git`, `gh` | 호스트 (GitHub 인증 정보가 호스트에 있음) |
 
+## 들어 있는 도구
+
+| 용도 | 도구 |
+|---|---|
+| C17 / C++20 컴파일러 | gcc·g++ 13, clang·clang++ 18 |
+| 메모리 검사 | ASan·UBSan (GCC, Clang 모두), valgrind |
+| 디버깅·추적 | gdb, strace, ltrace |
+| 기타 | make, python3, man 페이지, curl, netcat |
+
 ## 준비 (한 번만)
 
 1. Docker Desktop 설치: <https://www.docker.com/products/docker-desktop/>
@@ -44,7 +53,8 @@ docker compose -f docker/compose.yaml run --rm --service-ports dev
 컨테이너 안에서:
 
 ```bash
-gcc --version && clang --version && gdb --version | head -1
+gcc --version && g++ --version && clang --version && clang++ --version
+gdb --version | head -1
 strace -c true            # ptrace 권한 확인
 echo 'int main(void){return 0;}' > /tmp/t.c && gcc -g /tmp/t.c -o /tmp/t \
   && gdb -batch -ex run /tmp/t   # 경고 없이 "exited normally"가 나와야 정상

@@ -20,11 +20,23 @@ OSTEP(v1.10)과 CS:APP(3판)을 읽으며 운영체제·시스템 프로젝트�
 - `git`과 `gh`는 **호스트에서만** 실행한다 (GitHub 인증 정보가 호스트에 있다).
 - 줄바꿈은 LF로 통일한다 (`.gitattributes`). 셸 스크립트에 CRLF가 섞이면 컨테이너에서 깨진다.
 
+## 언어
+
+- 언어는 프로젝트마다 **C17** 또는 **C++20** 중 하나를 쓴다.
+  프로젝트를 시작할 때 ROADMAP.md의 권장 언어와 그 이유를 알려주고, **사용자의 확인을 받은 뒤** 시작한다.
+- 표준 라이브러리와 POSIX만 쓴다 (`_POSIX_C_SOURCE 200809L`). 웹 프론트엔드(08)는 예외.
+  외부 라이브러리가 필요하면 **먼저 묻는다**.
+- **C**: 매크로보다 `static inline` 함수를 우선 쓴다.
+- **C++**: 자원(메모리, 파일 디스크립터, 락 등)은 RAII로 관리한다.
+  - 그 프로젝트에서 배우려는 자료구조(B-트리, 버퍼 풀, 해시 테이블 등)는 STL로 대체하지 않고
+    직접 구현한다. STL은 학습 대상이 아닌 곳에만 쓴다.
+  - 템플릿 메타프로그래밍처럼 읽기 어려운 기법은 피한다.
+  - 파일 이름은 `.cpp` / `.hpp`로 한다.
+- **C와 C++가 섞일 때** (예: C로 만든 모듈을 C++ 프로젝트에서 재사용)는 `extern "C"` 경계를
+  한 곳(감싸는 헤더 하나)에 모으고, 그 이유를 주석으로 남긴다.
+
 ## 코드 규칙
 
-- 언어는 **C17**, 표준 C와 POSIX만 쓴다 (`-std=c17`, `_POSIX_C_SOURCE 200809L`).
-  웹 프론트엔드(08)는 예외. 외부 라이브러리가 필요하면 **먼저 묻는다**.
-- 매크로보다 `static inline` 함수를 우선 쓴다.
 - 주석은 한국어로, '무엇을 하는지'보다 **'왜 이렇게 설계했는지'**를 설명한다.
 - 시스템 콜과 라이브러리 호출의 **반환값은 항상 확인**한다.
   `EINTR`, 짧은 읽기/쓰기처럼 실패가 아닌 경우도 의도적으로 처리한다.
@@ -35,20 +47,28 @@ OSTEP(v1.10)과 CS:APP(3판)을 읽으며 운영체제·시스템 프로젝트�
 
 - 프로젝트별 `Makefile`로 빌드한다. 산출물은 모두 프로젝트 안의 `build/`에 둔다
   (`.gitignore`가 `build/`를 무시한다).
-- 기본 플래그:
+- 아래 규칙(경고 최대, `make asan` 타깃)은 **C와 C++에 똑같이** 적용한다.
+- C 기본 플래그:
   ```make
-  CC      ?= gcc
-  CFLAGS  := -std=c17 -D_POSIX_C_SOURCE=200809L -g -O1 \
-             -Wall -Wextra -Wpedantic -Wshadow -Wconversion -Wstrict-prototypes \
-             -Wmissing-prototypes -Wpointer-arith -Wcast-qual -Wformat=2 \
-             -Wnull-dereference -Wvla
+  CFLAGS   := -std=c17 -D_POSIX_C_SOURCE=200809L -g -O1 \
+              -Wall -Wextra -Wpedantic -Wshadow -Wconversion -Wstrict-prototypes \
+              -Wmissing-prototypes -Wpointer-arith -Wcast-qual -Wformat=2 \
+              -Wnull-dereference -Wvla
+  ```
+- C++ 기본 플래그 (C 전용 경고 대신 C++에서 의미 있는 경고를 켠다):
+  ```make
+  CXXFLAGS := -std=c++20 -D_POSIX_C_SOURCE=200809L -g -O1 \
+              -Wall -Wextra -Wpedantic -Wshadow -Wconversion -Wold-style-cast \
+              -Wnon-virtual-dtor -Woverloaded-virtual -Wmissing-declarations \
+              -Wcast-qual -Wformat=2 -Wnull-dereference -Wvla
   ```
 - 필수 타깃:
   - `make` — 기본 빌드
   - `make asan` — `-fsanitize=address,undefined -fno-omit-frame-pointer`로 빌드
   - `make test` — 기본 빌드 후 `tools/runtests.py`로 테스트
   - `make clean` — `build/` 삭제
-- `CC=clang make`로도 경고 없이 빌드되어야 한다.
+  - (권장) `make test-asan` — ASan 빌드로 같은 테스트
+- GCC와 Clang 둘 다 경고 없이 빌드되어야 한다: C는 `make CC=clang`, C++는 `make CXX=clang++`.
 
 ## 테스트
 
@@ -87,6 +107,7 @@ OSTEP(v1.10)과 CS:APP(3판)을 읽으며 운영체제·시스템 프로젝트�
 - 프로젝트 폴더 이름은 `NN-이름` (예: `01-shell`), 짧은 이름은 커밋·태그에 쓴다
   (shell, malloc, chip8, lang, httpd, redis, db, web, ...).
 - 프로젝트를 시작할 때:
+  - 권장 언어를 알리고 확인을 받는다 (위 '언어' 참고).
   - 폴더(`NN-이름/`)와 `README.md`, `NOTES.md`, `Makefile`, `tests/`를 만든다.
   - GitHub 마일스톤을 만든다 (예: `01 shell`).
   - 단계마다 이슈를 하나씩 만들어 마일스톤에 연결한다 (제목 예: `[shell] s1: 기본 실행 루프`).

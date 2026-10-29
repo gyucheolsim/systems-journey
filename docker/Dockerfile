@@ -7,8 +7,12 @@ ENV DEBIAN_FRONTEND=noninteractive \
     LC_ALL=C.UTF-8 \
     TZ=Asia/Seoul
 
-# 필수 도구: 컴파일러 두 종(gcc, clang)으로 경고를 교차 확인하고,
+# 필수 도구: 컴파일러 두 종(GCC, Clang)으로 C17·C++20 코드의 경고를 교차 확인하고,
 # gdb/strace/valgrind로 프로세스·메모리를 관찰한다.
+#   gcc/g++: C·C++ 컴파일러 (build-essential에도 들어 있지만 명시해 둔다)
+#   clang: clang과 clang++를 함께 설치한다
+#   libclang-rt-18-dev: clang의 ASan·UBSan 런타임. 없으면 clang으로 make asan 링크가 실패한다
+#   llvm: llvm-symbolizer — clang ASan 보고서의 주소를 함수 이름·줄 번호로 바꿔 준다
 # 나머지는 프로젝트 진행 중 자주 쓰는 보조 도구다
 #   man-pages: 시스템 콜 문서 (man 2 fork)
 #   procps/psmisc: ps, pstree — 셸의 작업 제어 확인용
@@ -16,7 +20,8 @@ ENV DEBIAN_FRONTEND=noninteractive \
 # 최소 이미지는 설치하는 man 페이지를 지우도록 설정돼 있어, 설치 전에 그 설정을 없앤다.
 RUN rm -f /etc/dpkg/dpkg.cfg.d/excludes \
     && apt-get update && apt-get install -y --no-install-recommends \
-        build-essential gcc clang make gdb strace ltrace valgrind \
+        build-essential gcc g++ clang libclang-rt-18-dev llvm \
+        make gdb strace ltrace valgrind \
         python3 \
         man-db manpages manpages-dev manpages-posix manpages-posix-dev \
         procps psmisc less file vim-tiny \
